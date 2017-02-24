@@ -1,0 +1,22 @@
+<input type="text" ng-model='search' placeholder="search.." style="margin-top:30px;">
+<button type="button" name="button">Filter</button>
+
+<h4><u>Add a new product</u></h4>
+
+<div style="width:150px; display:inline-block">
+    <form ng-submit='CreateProduct()' >
+        Name: <input type="text" placeholder="name.." ng-model='newProduct.productname' required>
+        Image(url): <input type="text" placeholder="http://" ng-model='newProduct.image_url' required>
+        Description<textarea rows="2" cols="18" ng-model='newProduct.description' required></textarea>
+        Initial Quantity:<input type="number" ng-model='newProduct.initial_quantity' required>
+        <input type="submit" name="" value="Create">
+    </form>
+</div>
+
+
+
+<div  ng-repeat='product in products' style="display:inline-block; margin-right:20px;" >
+    <img  ng-src="{{product.image_url}}" alt="Image here!" style="width:80px; heghit:80px;" >
+    <p>{{product.productname}}</p>
+    <p>{{product.initial_quantity}}<p>
+</div>

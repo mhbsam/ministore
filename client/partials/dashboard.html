@@ -1,0 +1,22 @@
+<h3>Dashboard Here@</h3>
+
+<div  ng-repeat='product in products | limitTo: 5' style="display:inline-block; margin-right:20px;" >
+    <img  ng-src="{{product.image_url}}" alt="Image here!" style="width:80px; heghit:80px;" >
+    <p>{{product.productname}}</p>
+    <p>{{product.initial_quantity}}<p>
+</div>
+<a style="text-align:center;" href="#!/products">show more...</a>
+
+
+<h4 style="margin-top:30px; text-align:center;"><u>Recent Orders</u></h4>
+<div style="text-align:center;" ng-repeat="order in orders | orderBy : '-createdAt' | limitTo:4 ">
+    <p>{{order.customer.name}} purchased {{order.order_quantity}} {{order.product.productname}}...(<span am-time-ago = 'order.createdAt'></span>)</p>
+</div>
+<a style="text-align:center;" href="#!/orders">show all orders...</a>
+
+
+<h4 style="margin-top:40px; text-align:center;"><u>New Customers</u></h4>
+<div style="text-align:center;" ng-repeat = "customer in customers | orderBy : '-createdAt'| limitTo: 4 ">
+    <p>{{customer.name}} joined the store.. (<span am-time-ago = 'customer.createdAt'></span>) </p>
+</div>
+<a style="text-align:center;" href="#!/customers">show all customers...</a>

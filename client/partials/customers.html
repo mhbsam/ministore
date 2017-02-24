@@ -1,0 +1,26 @@
+<h4><u>Add a new Customer</u></h4>
+
+<form ng-submit='CreateCustomer()'>
+    Customer Name:<input type="text" ng-model='newCustomer.name' required>
+    <input type="submit"  value="Add">
+</form>
+
+<input type="text" ng-model='search' placeholder="search name.." style="margin-top:30px;">
+<table >
+    <thead>
+        <tr>
+            <th>Customer Name</th>
+            <th>Created Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr ng-repeat= 'customer in customers | filter:search'>
+            <td ng-bind ='customer.name'></td>
+            <td ng-bind ='customer.createdAt | date'></td>
+            <td><button type="button" ng-click='DeleteCustomer(customer)'>Remove</button></td>
+            <td>{{customers.name}}</td>
+        </tr>
+    </tbody>
+</table>

@@ -1,0 +1,49 @@
+<h4><u>Add a new order</u></h4>
+
+<div ng-repeat='error in errors'>
+<p ng-bind='error.message'></p>
+</div>
+
+
+<form ng-submit='CreateOrder()'>
+    <!-- <select >
+        <option>Select a customer</option>
+        <option ng-repeat='customer in customers'  ng-model='newOrder.customer' value={{customer}}>{{customer.name}}</option>
+    </select> -->
+    <select ng-model='newOrder.customer' ng-options='customer as customer.name for customer in customers'>
+        <option>Select a customer</option>
+    </select>
+
+
+    <select ng-model='newOrder.product' ng-options='product as product.productname +" ("+product.initial_quantity+")" for product in products'>
+        <option>Select a product</option>
+    </select>
+
+
+
+    <input type="number" value="" placeholder="order qantity" ng-model='newOrder.order_quantity'>
+
+    <input type="submit" value="Order">
+</form>
+
+
+<input type="text" ng-model='search' placeholder="filter.." style="margin-top:30px;">
+<table >
+    <thead>
+        <tr>
+            <th>Customer Name</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr ng-repeat= 'order in orders | filter:search | limitTo: 10'>
+            <td ng-bind ='order.customer.name'></td>
+            <td ng-bind ='order.product.productname'></td>
+            <td ng-bind ='order.order_quantity'></td>
+            <td ng-bind ='order.createdAt | date'></td>
+        </tr>
+    </tbody>
+</table>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Simple MEAN Server</title>
+
+        <script src="angular/angular.js"></script>
+        <script src="angular-route/angular-route.js"></script>
+        <script src="moment/moment.js"></script>
+        <script src="angular-moment/angular-moment.js"></script>
+
+
+
+        <script>
+            var myApp = angular.module('myApp', ['ngRoute', 'angularMoment']);
+
+            myApp.config(function ($routeProvider) {
+              $routeProvider
+
+                //========================================
+                //       ******** Root *********
+                //========================================
+                .when('/',{
+                    templateUrl: 'partials/dashboard.html',
+                    controller : 'DashboardController',
+                })
+
+                //=======================================
+                //      *** customer routes ***
+                //=======================================
+                .when('/customers',{
+                    templateUrl: 'partials/customers.html',
+                    controller: 'CustomersController',
+                })
+
+                //=======================================
+                //      *** Product routes ***
+                //=======================================
+                .when('/products',{
+                    templateUrl: 'partials/products.html',
+                    controller: 'ProductsController',
+                })
+
+                //=======================================
+                //      *** Order routes ***
+                //=======================================
+                .when('/orders',{
+                    templateUrl: 'partials/orders.html',
+                    controller: 'OrdersController',
+                })
+
+                // .when('/new',{
+                //     templateUrl: 'partials/new.html',
+                //     controller: 'CustomersController',
+                // })
+
+                // .when('/show/:userId',{
+                //     templateUrl: 'partials/show.html',
+                //     controller: 'ShowController',
+                // })
+                
+                // .when('/edit/:userId',{
+                //     templateUrl: 'partials/edit.html',
+                //     controller: 'EditController',
+                // })
+
+
+                .otherwise({
+                  redirectTo: '/'
+                })
+            });
+
+//========================================================================================
+//------------------------------ Customer Factory --------------------------------------
+//========================================================================================
+            myApp.factory('CustomerFactory', function($http){
+
+                var factory ={};
+                // var customers = [{firstname:'user_fn_here'}, {lastname:'user_ln_here'}, {birthday:'user_birthday_here'}];
+
+
+                //*** Show all the customers
+                factory.index = function(callback){
+                    $http.get('/index_customers').then(function(res){
+                        if (typeof(callback) == 'function'){
+                            // console.log(res.data);
+                            callback(res.data)
+                        }
+                    })
+                }
+
+
+                //*** Create a new customer
+                factory.CreateCustomer = function(newCustomer, callback){
+                    console.log('sending customer creation request to server for:', newCustomer);
+                    $http.post('/new_customer', newCustomer).then(function(res) {
+                        if (typeof(callback) == 'function'){
+                            callback(res.data)
+                        }
+                    })
+                }
+
+
+                //*** Delete a customer
+                factory.DeleteCustomer = function(customer, callback) {
+                    console.log('customer in factory to be deleted', customer);
+                    $http.post('/delete_customer', customer).then(function(res){
+                        if (typeof(callback) == 'function'){
+                            callback(res.data)
+                        }
+                    })
+                }
+
+                return factory;
+            });
+
+            myApp.factory('User', function(){
+                var factory ={};
+                var user = null;
+
+                factory.get = function(callback){
+                    callback(user);
+                }
+
+                factory.set = function(name, callback){
+                    user =name;
+                    callback(user);
+                }
+
+                return factory;
+            });
+
+//========================================================================================
+//-------------------------------- Customers Controller ----------------------------------
+//========================================================================================
+            myApp.controller('CustomersController', ['$scope','CustomerFactory', '$location','User', function($scope, CustomerFactory, $location, User ){
+                console.log('Starting customers controller');
+
+                // *** setting up minisession between controllers
+                // var user = prompt('Please enter your name!')
+                // User.set(user, function(data){
+                //     $scope.user = data;
+                // })
+
+
+                $scope.customers =[];
+
+                // *** Request a list of all the customers
+                CustomerFactory.index(function(data){
+                    $scope.customers = data;
+                    console.log('customer scope here',$scope.customers);
+                })
+
+
+                //*** Request to create a new user
+                $scope.CreateCustomer = function(){
+                    console.log('initiating customer creation with:', $scope.newCustomer);
+                    CustomerFactory.CreateCustomer($scope.newCustomer, function(data){
+                        $scope.customers = data;
+                        // $location.url('/');
+                        $scope.newCustomer={};
+                    })
+                }
+
+
+                // *** Request to delete a customer
+                $scope.DeleteCustomer = function(customer){
+                    CustomerFactory.DeleteCustomer(customer, function(data){
+                        $scope.customers = data;
+                    })
+                }
+            }]);
+
+
+//========================================================================================
+//                          ***** Product Factory *****
+//========================================================================================
+            myApp.factory('ProductFactory', function($http){
+                var factory ={};
+                // var products = [{firstname:'user_fn_here'}, {lastname:'user_ln_here'}, {birthday:'user_birthday_here'}];
+
+
+                //*** Show all the products
+                factory.index = function(callback){
+                    $http.get('/index_products').then(function(res){
+                        if (typeof(callback) == 'function'){
+                            // console.log(res.data);
+                            callback(res.data)
+                        }
+                    })
+                }
+
+
+                //*** send new product creation request to server
+                factory.CreateProduct = function(newProduct, callback){
+                    console.log('sending product creation request to server for new product:', newProduct);
+                    $http.post('/new_product', newProduct).then(function(res) {
+                        if (typeof(callback) == 'function'){
+                            callback(res.data)
+                        }
+                    })
+                }
+
+
+                // //*** Delete a product
+                // factory.DeleteProduct = function(product, callback) {
+                //     console.log('product in factory to be deleted', product);
+                //     $http.post('/delete', product).then(function(res){
+                //         if (typeof(callback) == 'function'){
+                //             callback(res.data)
+                //         }
+                //     })
+                // }
+
+                return factory;
+            });
+
+
+//========================================================================================
+//                          ***** Products Controller *****
+//========================================================================================
+            myApp.controller('ProductsController', ['$scope','ProductFactory', '$location','User', function($scope, ProductFactory, $location, User ){
+
+
+                console.log('Starting products controller');
+
+                User.get(function(data){
+                    $scope.user = data;
+                })
+
+                $scope.products =[];
+
+                // *** Request a list of all the customers
+                ProductFactory.index(function(data){
+                    $scope.products = data;
+                    console.log('products scope here',$scope.products);
+                })
+
+
+                //*** Sending new product creation request to product factory
+                $scope.CreateProduct = function(){
+                    console.log('initiating product creation with:', $scope.newProduct);
+                    ProductFactory.CreateProduct($scope.newProduct, function(data){
+                        $scope.products = data;
+                        // $location.url('/');
+                        $scope.newProduct={};
+                    })
+                }
+
+                // // *** Request to delete a product
+                // $scope.DeleteProduct = function(product){
+                //     ProductFactory.DeleteProduct(product, function(data){
+                //         $scope.products = data;
+                //     })
+                // }
+            }]);
+
+//========================================================================================
+//                           ***** Order Factory *****
+//========================================================================================
+            myApp.factory('OrderFactory', function($http){
+                console.log('starting order factory');
+
+                var factory = {};
+
+                //requesting a list of all the orders from server
+                factory.index = function(callback){
+                    console.log('requesting a list of all the orders from server');
+                    $http.get('/index_orders').then(function(res){
+                        if (typeof(callback) == 'function'){
+                            callback(res.data);
+                        }
+                    })
+                }
+
+                //*** sending new order creation request to server
+                factory.CreateOrder = function(newOrder, callback){
+                    console.log('sending order creation request to server for:', newOrder);
+                    console.log(newOrder.order_quantity);
+                    console.log(newOrder.product.initial_quantity);
+                    $http.post('/new_order', newOrder).then(function(res){
+                        if (typeof(callback) == 'function'){
+                            callback(res.data);
+                        }
+                    })
+
+                }
+
+                return factory;
+            });
+
+//========================================================================================
+//                           ***** Orders controller *****
+//========================================================================================
+            myApp.controller('OrdersController', ['$scope','ProductFactory', '$location','User','CustomerFactory','OrderFactory', function($scope, ProductFactory, $location, User, CustomerFactory, OrderFactory ){
+
+                console.log('starting Orders controller');
+
+                $scope.products = [];
+                $scope.customers = [];
+                $scope.orders =[];
+                $scope.errors = [];
+
+
+
+                // *** Request a list of all the products
+                var product_index = function(){ ProductFactory.index(function(data){
+                    $scope.products = data;
+                    console.log('products scope at orders controller:',$scope.products);
+                    })
+                }
+                product_index();
+
+
+                // *** Request a list of all the customers
+                var customer_index = function(){ CustomerFactory.index(function(data){
+                    $scope.customers = data;
+                    console.log('customer scope at order controller:',$scope.customers);
+                    })
+                }
+                customer_index();
+
+
+                // *** Request a list of all the orders
+                var order_index = function(){OrderFactory.index(function(data){
+                    $scope.orders = data;
+                    console.log('orders scope at orders controller:',$scope.orders);
+                    })
+                }
+                order_index();
+
+
+                //*** Sending new order creation request to order factory
+                $scope.CreateOrder = function(){
+                    console.log('initiating order creation in order controller for:', $scope.newOrder);
+                    if($scope.newOrder.order_quantity > $scope.newOrder.product.initial_quantity){
+                        console.log('error');
+                        $scope.errors = [{message: 'Maximum available number of ' + $scope.newOrder.product.productname + ' is '+$scope.newOrder.product.initial_quantity+ '!'}]
+                        console.log($scope.errors);
+
+                        return;
+                    }
+                    OrderFactory.CreateOrder($scope.newOrder, function(data){
+                        if(data.errors){
+                            $scope.errors = data.errors;
+                            return;
+                        }
+                        $scope.orders = data;
+                        $scope.newOrder ={};
+                        console.log('before running index');
+                        // order_index();
+                        product_index();
+                        // customer_index();
+                    })
+                }
+
+                //*** Range Filter to Change Quantity based on Selected Order
+                myApp.filter('range', function() {
+                 return function(input, max) {
+                   max = parseInt(max);
+                   for (var i=1; i<=max; i++)
+                     input.push(i);
+                   return input;
+                 };
+                });
+
+            }]);
+
+
+//========================================================================================
+//                           ***** Dashboard controller *****
+//========================================================================================
+            myApp.controller('DashboardController', ['$scope','ProductFactory', 'CustomerFactory', 'OrderFactory','$location','User', function($scope, ProductFactory, CustomerFactory, OrderFactory, $location, User ){
+
+                console.log('starting Dashboard controller');
+
+                // *** Request a list of all the products
+                var product_index = function(){ ProductFactory.index(function(data){
+                    $scope.products = data;
+                    console.log('products scope at orders controller:',$scope.products);
+                    })
+                }
+                product_index();
+
+
+                // *** Request a list of all the customers
+                var customer_index = function(){ CustomerFactory.index(function(data){
+                    $scope.customers = data;
+                    console.log('customer scope at order controller:',$scope.customers);
+                    })
+                }
+                customer_index();
+
+
+                // *** Request a list of all the orders
+                var order_index = function(){OrderFactory.index(function(data){
+                    $scope.orders = data;
+                    console.log('orders scope at orders controller:',$scope.orders);
+                    })
+                }
+                order_index();
+
+
+
+
+            }]);
+
+
+
+//========================================================================================
+//                              ***** show controller *****
+//========================================================================================
+            // myApp.controller('ShowController', ['$scope','CustomerFactory', '$location','$routeParams', function($scope, CustomerFactory, $location, $routeParams ){
+            //
+            //     $scope.user = {};
+            //
+            //     //*** Request to view a specific user
+            //         CustomerFactory.ShowUser($routeParams.userId, function(data){
+            //             $scope.user = data;
+            //        })
+            // }]);
+
+//--------------------------------------------------------------------------------------
+//---------------------------- Edit controller -----------------------------------------
+//--------------------------------------------------------------------------------------
+            // myApp.controller('EditController', ['$scope','CustomerFactory', '$location','$routeParams', function($scope, CustomerFactory, $location, $routeParams ){
+            //     console.log('starting edit controller');
+            //
+            //     $scope.user = {};
+            //
+            //     //*** Request to edit a specific user
+            //     CustomerFactory.EditUser($routeParams.userId, function(data){
+            //         console.log('getting back to the edit controller');
+            //         $scope.user = data;
+            //         console.log('scope.customers before going to html page',$scope.user);
+            //     })
+            //
+            //
+            //     //*** sending updated user information to the factory
+            //     $scope.UpdateUser = function() {
+            //         CustomerFactory.UpdateUser($scope.modifiedUser,$routeParams.userId, function(data){
+            //             $scope.user = data;
+            //             $location.url('/index');
+            //         })
+            //     }
+            // }]);
+//--------------------------------------------------------------------------------------
+</script>
+</head>
+    <body ng-app='myApp'>
+        <h3> Mini MEAN Store</h3>
+        <a href="#!/index">Dashboard</a> | <a href="#!/products">Products</a> | <a href="#!/orders">Orders</a> | <a href="#!/customers">Customers</a> | <a href="#!/setting">Settings</a>
+        <div ng-view="">
+        </div>
+    </body>
+</html>
